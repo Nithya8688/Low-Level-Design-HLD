@@ -19,4 +19,5 @@ public interface DailyIntakeRepository
             @Param("userId") Long userId,
             @Param("date") LocalDate date
     );
+
 }
