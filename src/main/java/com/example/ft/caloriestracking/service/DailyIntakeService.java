@@ -6,6 +6,7 @@ import com.example.ft.caloriestracking.entity.DailyIntake;
 import com.example.ft.caloriestracking.entity.Food;
 import com.example.ft.caloriestracking.repository.DailyIntakeRepository;
 import com.example.ft.caloriestracking.repository.FoodRepository;
+import com.example.ft.kafkaconfig.producer.KafkaProducerService;
 import com.example.ft.rabbitmqconfig.RabbitConfig;
 import com.example.ft.rabbitmqconfig.dto.DailyIntakeEvent;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,15 +20,19 @@ public class DailyIntakeService {
     private final FoodRepository foodRepository;
     private final DailyIntakeRepository intakeRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final KafkaProducerService producerService;
+
 
     public DailyIntakeService(
             FoodRepository foodRepository,
             DailyIntakeRepository intakeRepository,
-            RabbitTemplate rabbitTemplate) {
+            RabbitTemplate rabbitTemplate,
+            KafkaProducerService producerService) {
 
         this.foodRepository = foodRepository;
         this.intakeRepository = intakeRepository;
         this.rabbitTemplate = rabbitTemplate;
+        this.producerService = producerService;
     }
 
     public void saveDailyIntake(DayIntakeRequest request) {
@@ -62,6 +67,7 @@ public class DailyIntakeService {
                         request.getDate()
                 )
         );
+        producerService.sendMessage(request.getUserId()+" "+request.getDate());
     }
 }
 
