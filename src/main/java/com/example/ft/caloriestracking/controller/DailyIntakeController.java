@@ -4,6 +4,7 @@ import com.example.ft.caloriestracking.service.DailyIntakeService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/daily-intake")
 public class DailyIntakeController {
 
