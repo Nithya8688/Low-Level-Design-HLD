@@ -4,14 +4,24 @@ package com.example.ft.caloriestracking.service;
 import com.example.ft.caloriestracking.dto.DayIntakeRequest;
 import com.example.ft.caloriestracking.dto.DayIntakeResponse;
 import com.example.ft.caloriestracking.dto.FoodItemRequest;
+import com.example.ft.caloriestracking.entity.DailyIntake;
 import com.example.ft.caloriestracking.entity.Food;
+import com.example.ft.caloriestracking.repository.DailyIntakeRepository;
 import com.example.ft.caloriestracking.repository.FoodRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class CalorieCalculationService {
 
     private final FoodRepository foodRepository;
+    @Autowired
+    private FoodRepository repository;
+    @Autowired
+    private DailyIntakeRepository intakeRepository;
 
     public CalorieCalculationService(FoodRepository foodRepository) {
         this.foodRepository = foodRepository;
@@ -45,6 +55,41 @@ public class CalorieCalculationService {
         response.setTotalProtein(round(protein));
         response.setTotalCarbs(round(carbs));
         response.setTotalFat(round(fat));
+
+        return response;
+    }
+
+    public List<Food> addFoods(List<Food> foods) {
+
+        List<Food> foodsToSave = foods.stream()
+                .filter(food -> repository.findByNameIgnoreCase(food.getName()).isEmpty())
+                .toList();
+
+        return repository.saveAll(foodsToSave);
+    }
+
+    public DayIntakeResponse getTotalCalories(DayIntakeRequest request) {
+
+        List<DailyIntake> dailyIntakes =
+                intakeRepository.getByUserIdAndIntakeDate(request.getUserId(),  LocalDate.parse(request.getDate()));
+
+        double totalCalories = 0;
+        double totalProtein = 0;
+        double totalCarbs = 0;
+        double totalFat = 0;
+
+        for (DailyIntake intake : dailyIntakes) {
+            totalCalories += intake.getCalories() != null ? intake.getCalories() : 0;
+            totalProtein  += intake.getProtein()  != null ? intake.getProtein()  : 0;
+            totalCarbs    += intake.getCarbs()    != null ? intake.getCarbs()    : 0;
+            totalFat      += intake.getFat()      != null ? intake.getFat()      : 0;
+        }
+
+        DayIntakeResponse response = new DayIntakeResponse();
+        response.setTotalCalories(totalCalories);
+        response.setTotalProtein(totalProtein);
+        response.setTotalCarbs(totalCarbs);
+        response.setTotalFat(totalFat);
 
         return response;
     }

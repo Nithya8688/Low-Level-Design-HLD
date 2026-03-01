@@ -64,11 +64,20 @@ public class NotificationConsumer {
         try {
             Long userId = event.getUserId();
             LocalDate date = LocalDate.parse(event.getDate());
-            if(retryCount==0 || retryCount==1 || retryCount==2 || retryCount==3){
+            if(retryCount==0 || retryCount==1 ){
             throw new RuntimeException("Bad exception for testing");}
 
             Double totalCalories =
                     intakeRepository.getTotalCalories(userId, date);
+
+            Double totalProtein =
+                    intakeRepository.getTotalProtein(userId, date);
+
+            Double totalCarbs =
+                    intakeRepository.getTotalCarbs(userId, date);
+
+            Double totalFat =
+                    intakeRepository.getTotalFat(userId, date);
 
             Double targetCalories =
                     targetRepository.findById(userId)
@@ -79,21 +88,28 @@ public class NotificationConsumer {
 
             String subject;
             String body;
+            body =
+                    "📅 Date: " + date + "\n\n" +
+                            "🔥 Calories: " + totalCalories + " kcal\n" +
+                            "🥩 Protein: " + totalProtein + " g\n" +
+                            "🍚 Carbs: " + totalCarbs + " g\n" +
+                            "🧈 Fat: " + totalFat + " g\n\n" +
+                            "🎯 Target Calories: " + targetCalories + " kcal";
 
             if (percentage >= 100) {
                 subject = "🚨 Calorie Limit Exceeded";
-                body = "You exceeded your calorie target!\n\n"
-                        + "Consumed: " + totalCalories + " kcal\n"
-                        + "Target: " + targetCalories + " kcal";
+//                body = "You exceeded your calorie target!\n\n"
+//                        + "Consumed: " + totalCalories + " kcal\n"
+//                        + "Target: " + targetCalories + " kcal";
             } else if (percentage >= 80) {
                 subject = "⚠️ Calorie Warning";
-                body = "You reached 80% of your calorie target.\n\n"
-                        + "Consumed: " + totalCalories + " kcal\n"
-                        + "Target: " + targetCalories + " kcal";
+//                body = "You reached 80% of your calorie target.\n\n"
+//                        + "Consumed: " + totalCalories + " kcal\n"
+//                        + "Target: " + targetCalories + " kcal";
             } else {
-                // ✅ nothing to notify → ACK and exit
-                channel.basicAck(deliveryTag, false);
-                return;
+                subject = "🚨 Calories Tracker";
+//                channel.basicAck(deliveryTag, false);
+//                return;
             }
 
             // 🔔 SEND EMAIL
