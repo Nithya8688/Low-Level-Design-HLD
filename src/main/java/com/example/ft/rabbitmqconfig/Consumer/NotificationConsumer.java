@@ -64,8 +64,8 @@ public class NotificationConsumer {
         try {
             Long userId = event.getUserId();
             LocalDate date = LocalDate.parse(event.getDate());
-            if(retryCount==0 || retryCount==1 || retryCount==2 || retryCount==3){
-            throw new RuntimeException("Bad exception for testing");}
+//            if(retryCount==0 || retryCount==1 || retryCount==2 || retryCount==3){
+//            throw new RuntimeException("Bad exception for testing");}
 
             Double totalCalories =
                     intakeRepository.getTotalCalories(userId, date);
